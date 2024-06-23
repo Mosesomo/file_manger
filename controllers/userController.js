@@ -41,7 +41,7 @@ const postNew = asyncHandler(async (req, res) => {
 
 const getMe = asyncHandler(async (req, res) =>{
     res.status(200).json(req.user);
-})
+});
 
 module.exports = { 
     postNew,

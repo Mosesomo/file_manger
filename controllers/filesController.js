@@ -10,15 +10,16 @@ const postUploads = asyncHandler(async (req, res) => {
     const userId = req.user.id;
 
     if (!name) return res.status(400).json({Error: "Missing file name"});
-    if (!type || !['folder', 'file', 'image'].includes(type)){
-        return res.status(400).json({Error: "Missing type"});
+    if (!type || !['folder', 'file', 'image'].includes(type)) {
+        return res.status(400).json({Error: "Invalid type"});
     }
     if (!data && type !== 'folder') return res.status(400).json({Error: "Missing data"});
 
+    let parentFile = null;
     if (parentId) {
-        const parentFile = await Files.findOne({parentId});
-        if (!parentFile) return res.status(400).json({Error: "parent not found"});
-        if (parentFile !== 'folder') return res.status(400).json({Error: "parent not a folder"});
+        parentFile = await Files.findById(parentId);
+        if (!parentFile) return res.status(400).json({Error: "Parent not found"});
+        if (parentFile.type !== 'folder') return res.status(400).json({Error: "Parent not a folder"});
     }
 
     let localPath = '';
@@ -34,12 +35,43 @@ const postUploads = asyncHandler(async (req, res) => {
         userId,
         name,
         type,
-        isPublic: isPublic || null,
+        isPublic: isPublic || false,
         parentId: parentId || null,
         localPath: localPath || null
     });
-    console.log(file)
-    res.status(200).json(file)
+    console.log(file);
+    res.status(200).json(file);
 });
 
-module.exports = postUploads;
+const getShow = asyncHandler(async (req, res) => {
+    const file = await Files.findById(req.params.id);
+
+    if (!file) {
+        res.status(404).json({Error: "Not Found"});
+        throw new Error("Not Found");
+    }
+
+    if (file.userId.toString() !== req.user.id) {
+        res.status(401).json({Error: "Unauthorized"});
+        throw new Error("Unauthorized");
+    }
+
+    return res.status(200).json(file);
+});
+
+const getIndex = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    const parentId = req.query.parentId === '0' ? null : req.query.parentId;
+    const page = parseInt(req.query.page, 10) || 0;
+    const limit = 20;
+    const skip = page * limit;
+
+    const files = await Files.find({ userId, parentId }).skip(skip).limit(limit);
+    res.status(200).json(files);
+});
+
+module.exports = {
+    postUploads,
+    getShow,
+    getIndex
+};

@@ -20,7 +20,7 @@ const connect = asyncHandler(async (req, res) => {
                 },
             },
             process.env.ACCESS_TOKEN,
-            { expiresIn: "20m" }
+            { expiresIn: "50m" }
         );
         res.status(200).json({token: token});
     } else {
