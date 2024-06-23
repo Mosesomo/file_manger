@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler');
 const Files = require('../models/file');
 const Users = require('../models/users');
 const fs = require('fs');
+const mime = require('mime-types')
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
@@ -70,8 +71,73 @@ const getIndex = asyncHandler(async (req, res) => {
     res.status(200).json(files);
 });
 
+const publish = asyncHandler(async (req, res) => {
+    const file = await Files.findById(req.params.id);
+    if (!file) {
+        res.status(404).json({Error: "File not Found"});
+        throw new Error("File not Found");
+    }
+
+    if (file.userId.toString() !== req.user.id) {
+        res.status(401).json({Error: "User unauthorized"});
+        throw new Error("Unauthorized");
+    }
+
+    file.isPublic = true;
+    await file.save();
+    res.status(200).json(file)
+});
+
+const unpublish = asyncHandler(async (req, res) => {
+    const file = await Files.findById(req.params.id);
+    if (!file) {
+        res.status(404).json({Error: "File not Found"});
+        throw new Error("File not Found");
+    }
+
+    if (file.userId.toString() !== req.user.id) {
+        res.status(401).json({Error: "User unauthorized"});
+        throw new Error("Unauthorized");
+    }
+
+    file.isPublic = false;
+    await file.save();
+    res.status(200).json(file)
+});
+
+const getFile = asyncHandler(async (req, res) => {
+    const file = await Files.findById(req.params.id);
+
+    if (!file) {
+        res.status(404).json({Error: "Not Found"});
+        throw new Error("Not Found");
+    }
+
+    if (!file.isPublic && (!req.user || file.userId.toString() !== req.user.id)) {
+        res.status(404).json({Error: "Not Found"});
+        throw new Error("Not found");
+    }
+
+    if (file.type === "folder") {
+        res.status(400).json("A folder does not have the content!");
+        throw new Error("A folder does not have the content!");
+    }
+
+    if (!fs.existsSync(file.localPath)) {
+        res.status(404).json({Error: "Not Found"});
+        throw new Error("Not found");
+    }
+
+    const mimeType = mime.lookup(file.name);
+    res.setHeader('Content-Type', mimeType);
+    fs.createReadStream(file.localPath).pipe(res);
+});
+
 module.exports = {
     postUploads,
     getShow,
-    getIndex
+    getIndex,
+    publish,
+    unpublish,
+    getFile
 };
