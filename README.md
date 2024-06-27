@@ -10,3 +10,9 @@ CREAT USER ENDPOINT(POST)
 Validations
 ____________________________________________________________________
 ![Screenshot (5)](https://github.com/Mosesomo/file_manger/assets/107793010/63f69796-845d-4b21-90dd-8f5b44fa8396)
+
+
+LOGIN USER endpoint (/api/connect)
+------------------------------------------------------------------------------------------------------
+![Screenshot (8)](https://github.com/Mosesomo/file_manger/assets/107793010/d3a21040-2912-4096-839a-14a52180d974)
+
