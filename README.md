@@ -4,3 +4,9 @@ In this project, I learned about performing CRUD (Create, Read, Update, Delete) 
 
 CREAT USER ENDPOINT(POST)
 ![Screenshot (6)](https://github.com/Mosesomo/file_manger/assets/107793010/9d464c53-1118-4ff7-97d3-6e3578700b5a)
+
+
+
+Validations
+____________________________________________________________________
+![Screenshot (5)](https://github.com/Mosesomo/file_manger/assets/107793010/63f69796-845d-4b21-90dd-8f5b44fa8396)
