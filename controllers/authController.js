@@ -16,6 +16,7 @@ const connect = asyncHandler(async (req, res) => {
             {
                 user: {
                     email: user.email,
+                    password: user.password,
                     id: user.id
                 },
             },
@@ -23,6 +24,7 @@ const connect = asyncHandler(async (req, res) => {
             { expiresIn: "50m" }
         );
         res.status(200).json({token: token});
+        console.log("Token:", token);
     } else {
         res.status(400).json({error: "check email or password"});
         throw new Error("Please check your email or password");

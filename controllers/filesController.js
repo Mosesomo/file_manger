@@ -109,21 +109,25 @@ const getFile = asyncHandler(async (req, res) => {
     const file = await Files.findById(req.params.id);
 
     if (!file) {
+        console.log('File not found in the database');
         res.status(404).json({Error: "Not Found"});
         throw new Error("Not Found");
     }
 
-    if (!file.isPublic && (!req.user || file.userId.toString() !== req.user.id)) {
+    if (file.isPublic === false && (!req.user || file.userId.toString() !== req.user.id)) {
+        console.log('User not authorized to access this file');
         res.status(404).json({Error: "Not Found"});
         throw new Error("Not found");
     }
 
     if (file.type === "folder") {
+        console.log('Requested file is a folder');
         res.status(400).json("A folder does not have the content!");
         throw new Error("A folder does not have the content!");
     }
 
     if (!fs.existsSync(file.localPath)) {
+        console.log('Local file path does not exist');
         res.status(404).json({Error: "Not Found"});
         throw new Error("Not found");
     }
@@ -133,11 +137,32 @@ const getFile = asyncHandler(async (req, res) => {
     fs.createReadStream(file.localPath).pipe(res);
 });
 
+const deleteFile = asyncHandler(async (req, res) => {
+    const file = await Files.findById(req.params.id);
+
+    if (!file) {
+        console.log("File not found in the database");
+        res.status(404).json({Error: "File Not Found"});
+        throw new Error("File not Found")
+    }
+
+    if (file.userId.toString() !== req.user.id) {
+        console.log("user unauthorized");
+        res.status(401).json({Error: "user unauthorized"});
+        throw new Error("Unauthorized");
+    }
+
+    await Files.deleteOne({_id: req.params.id});
+    console.log("File deleted successfully");
+    res.status(200).json({message: "File deleted successfully"});
+})
+
 module.exports = {
     postUploads,
     getShow,
     getIndex,
     publish,
     unpublish,
-    getFile
+    getFile,
+    deleteFile
 };
